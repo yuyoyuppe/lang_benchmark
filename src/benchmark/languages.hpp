@@ -16,6 +16,18 @@ struct LangSpec<Lang::Cpp> {
     static constexpr char VersionCmd[] = "cl";
 };
 
+
+template <>
+struct LangSpec<Lang::Tcc> {
+    static constexpr char MainStart[]  = "int main() {\nint sum = 0;";
+    static constexpr char Function[]   = "int f{}() {{ return {}; }}";
+    static constexpr char SumStmt[]    = "sum += f{}();";
+    static constexpr char MainEnd[]    = "return ((sum & 255) > 1000) ? 1 : 0;\n}";
+    static constexpr char Ext[]        = ".c";
+    static constexpr char Cmd[]        = R"(tcc -I"C:\Program Files\tcc" -L"C:\Program Files\tcc" {})";
+    static constexpr char VersionCmd[] = "tcc -version";
+};
+
 template <>
 struct LangSpec<Lang::Zig> {
     static constexpr char MainStart[]  = R"d(

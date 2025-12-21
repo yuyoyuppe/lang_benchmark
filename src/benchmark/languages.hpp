@@ -1,6 +1,7 @@
 #pragma once
 
-enum Lang { Jai, Cpp, Zig, CSharp, Lua, Rust, JavaScript, Perl, Python, Odin, Count };
+// Disable stuff slow by moving it after Count
+enum Lang { Jai, Cpp, CSharp, Lua, JavaScript, Perl, Python, Odin, Tcc, Count, Zig, Rust };
 
 template <Lang>
 struct LangSpec;

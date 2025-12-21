@@ -67,6 +67,7 @@ _Time in ms (lower is better)_
 ### Summary (newest)
 - Not sure what's up with Zig at this point.
 - Wow, Jai is competitive with C#!
+- I guess C++ is not _that_ well optimized now that we don't do `#include <stdio.h>`...
 
 ### Summary (with printf)
 - Zig is really slow on Windows, x2-3 slower with `-fno-llvm` atm. It's much faster if I don't pull in `std.debug.print`. That probably makes the compiler build the whole std.
@@ -76,3 +77,4 @@ _Time in ms (lower is better)_
 - C# is a hidden gem once again.
 - Python isn't much slower to start than Perl nowdays.
 - Rust is still safe.
+

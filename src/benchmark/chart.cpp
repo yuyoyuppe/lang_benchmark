@@ -3,14 +3,22 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <optional>
 #include <ranges>
+#include <span>
+#include <string>
+#include <string_view>
 #include <vector>
 
 using namespace std;
 
 namespace chart {
-static constexpr int W = 1024, H = 600;
-static constexpr int PL = 80, PR = 24, PT = 44, PB = 56;
+static constexpr int    VW = 1024, VH = 600;
+static constexpr double OUT_SCALE = 2.0;
+static constexpr int    W = int(VW * OUT_SCALE), H = int(VH * OUT_SCALE);
+
+// Layout in viewBox units.
+static constexpr int ML = 80, MR = 24, MT = 44, MB = 56;
 static constexpr int LEG_W = 240;
 
 static constexpr string_view FONT = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -47,6 +55,29 @@ static string esc(string_view s) {
     return out;
 }
 
+static string fmt_count(int n) {
+    const int an = n < 0 ? -n : n;
+    if(an >= 1000000) {
+        const double v = double(n) / 1000000.0;
+        auto         s = format("{:.1f}M", v);
+        // Drop trailing ".0" (e.g. "1.0M" -> "1M").
+        if(s.size() >= 3 && s[s.size() - 3] == '.' && s[s.size() - 2] == '0')
+            s.erase(s.size() - 3, 2);
+        return s;
+    }
+    if(an >= 1000) {
+        if(n % 1000 == 0)
+            return format("{}K", n / 1000);
+        const double v = double(n) / 1000.0;
+        auto         s = format("{:.1f}K", v);
+        // Drop trailing ".0" (e.g. "22.0K" -> "22K").
+        if(s.size() >= 3 && s[s.size() - 3] == '.' && s[s.size() - 2] == '0')
+            s.erase(s.size() - 3, 2);
+        return s;
+    }
+    return format("{}", n);
+}
+
 static vector<int> all_xs(span<const series> ss) {
     vector<int> xs;
     for(auto & s : ss)
@@ -76,7 +107,11 @@ static optional<double> y_at(span<const point> pts, int x) {
 string svg_lines(span<const series> ss, string_view title) {
     const auto xs = all_xs(ss);
     const auto my = max_y(ss);
-    const int  PW = W - PL - PR, PH = H - PT - PB;
+    const int  PL = ML;
+    const int  PR = MR;
+    const int  PT = MT;
+    const int  PB = MB;
+    const int  PW = VW - PL - PR, PH = VH - PT - PB;
 
     const int xmin = xs.empty() ? 0 : xs.front();
     const int xmax = xs.empty() ? 1 : xs.back();
@@ -95,20 +130,21 @@ string svg_lines(span<const series> ss, string_view title) {
     string s;
     s.reserve(size_t(H) * 24);
 
-    const auto t = esc(title);
+    (void)title; // header is standardized for this benchmark
+    const auto t = esc(format("lang_benchmark: time to \"compile\" {} functions", fmt_count(xmax)));
 
     s += format(
       R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="{}" height="{}" viewBox="0 0 {} {}" role="img" aria-label="{}">
 )svg",
       W,
       H,
-      W,
-      H,
+      VW,
+      VH,
       t);
     s += format(R"svg(<rect x="0" y="0" width="{}" height="{}" fill="{}"/>
 )svg",
-                W,
-                H,
+                VW,
+                VH,
                 BG);
 
     s += format(R"svg(<style>
@@ -176,7 +212,7 @@ string svg_lines(span<const series> ss, string_view title) {
                     PT + PH,
                     px,
                     PT + PH + 22,
-                    x);
+                    fmt_count(x));
     }
 
     // lines + points
@@ -217,9 +253,21 @@ string svg_lines(span<const series> ss, string_view title) {
         }
     }
 
-    // legend (top-right)
-    const int lx0 = PL + PW - LEG_W;
-    int       ly  = PT - 6;
+    // legend (embedded inside plot, top-left)
+    const int lx0 = PL + 12;
+    const int ly0 = PT + 10;
+    const int ldy = 16;
+    const int lh  = int(ss.size()) * ldy + 10;
+
+    s += format(R"svg(<rect x="{}" y="{}" width="{}" height="{}" rx="6" fill="none" stroke="{}"/>
+)svg",
+                lx0 - 10,
+                ly0 - 14,
+                LEG_W,
+                lh,
+                GRID);
+
+    int ly = ly0;
     for(auto & se : ss) {
         s += format(R"svg(<rect x="{}" y="{}" width="10" height="10" rx="2" fill="{}"/>
 <text class="l" x="{}" y="{}">{}</text>
@@ -230,7 +278,7 @@ string svg_lines(span<const series> ss, string_view title) {
                     lx0 + 16,
                     ly + 10,
                     esc(se.label));
-        ly += 16;
+        ly += ldy;
     }
 
     // axis labels

@@ -90,7 +90,7 @@ _Time in ms (lower is better)_
 ### Summary (newest)
 - Tiny C compiler kicks ass.
 
-### Summary (with slow)
+### Summary (with Zig and Rust)
 - Not sure what's up with Zig at this point.
 - Wow, Jai is competitive with C#!
 - I guess C++ is not _that_ well optimized now that we don't do `#include <stdio.h>`...
@@ -103,5 +103,6 @@ _Time in ms (lower is better)_
 - C# is a hidden gem once again.
 - Python isn't much slower to start than Perl nowdays.
 - Rust is still safe.
+
 
 

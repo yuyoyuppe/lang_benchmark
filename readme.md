@@ -31,7 +31,7 @@ premake vs2026
 | Odin | `odin version dev-2025-12-nightly:ac61f08` |
 
 
-### Results (neweset)
+### Results (newest)
 
 _Time in ms (lower is better)_
 
@@ -53,7 +53,7 @@ _Time in ms (lower is better)_
 ![](results_with_slow.svg)
 
 
-### Table (with slow)
+### Table (with Zig and Rust)
 
 _Time in ms (lower is better)_
 
@@ -103,4 +103,5 @@ _Time in ms (lower is better)_
 - C# is a hidden gem once again.
 - Python isn't much slower to start than Perl nowdays.
 - Rust is still safe.
+
 
